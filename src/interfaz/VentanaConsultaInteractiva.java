@@ -1,9 +1,9 @@
 package interfaz;
 
+import modelo.ArbolUser;
 import modelo.Usuario;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.nio.file.*;
@@ -20,9 +20,12 @@ public class VentanaConsultaInteractiva extends JFrame {
     private JSONArray datosJSON;
     private String tipoArchivo;
 
+    // Agregar JTextArea para mostrar el árbol
+    private JTextArea areaArbol;
+
     public VentanaConsultaInteractiva(String tipo, Usuario usuarioLogeado) {
         setTitle("Gestión de " + tipo);
-        setSize(600, 400);
+        setSize(800, 400);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -41,6 +44,32 @@ public class VentanaConsultaInteractiva extends JFrame {
 
         add(new JScrollPane(tabla), BorderLayout.CENTER);
         add(panelBotones, BorderLayout.SOUTH);
+
+        // Crear el área de texto para mostrar el árbol
+        areaArbol = new JTextArea(10, 40);
+        areaArbol.setEditable(false);
+        JScrollPane scrollArbol = new JScrollPane(areaArbol);
+        add(scrollArbol, BorderLayout.EAST); // Agregar el panel al lado derecho
+
+        // Crear instancia del árbol
+        ArbolUser arbolUser = new ArbolUser();
+
+        // Insertar usuarios desde el JSON en el árbol
+        for (Object obj : datosJSON) {
+            JSONObject item = (JSONObject) obj;
+            String nombre = (String) item.get("nombreCompleto");
+            String email = (String) item.get("correo");
+            String usuarioNombre = (String) item.get("usuario");
+            String telefono = (String) item.get("telefono");
+            String contrasena = ""; // Asigna si lo tienes en el JSON
+
+            Usuario usuario = new Usuario(nombre, email, usuarioNombre, telefono, contrasena);
+            arbolUser.insertar(usuario);
+        }
+
+        // Mostrar el árbol en orden en el área
+        areaArbol.setText(""); // Limpiar antes
+        arbolUser.inOrden(areaArbol); // Mostrar árbol en orden
 
         btnActualizar.addActionListener(e -> actualizarSeleccionado());
         btnInactivar.addActionListener(e -> inactivarSeleccionado());
