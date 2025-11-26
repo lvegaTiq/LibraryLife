@@ -22,9 +22,6 @@ public class VentanaRegistrarPrestamo extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // ------------------------
-        //    TABLA DE LIBROS
-        // ------------------------
         String[] columnas = {"ID", "Título", "Autor", "Categoría", "Disponible"};
         modeloTabla = new DefaultTableModel(columnas, 0);
         tablaLibros = new JTable(modeloTabla);
@@ -34,9 +31,6 @@ public class VentanaRegistrarPrestamo extends JFrame {
         JScrollPane scroll = new JScrollPane(tablaLibros);
         add(scroll, BorderLayout.CENTER);
 
-        // ------------------------
-        //  PANEL INFERIOR (Usuario + Botón)
-        // ------------------------
         JPanel panelInferior = new JPanel();
         panelInferior.setLayout(new GridLayout(2, 2, 10, 10));
         panelInferior.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -49,16 +43,12 @@ public class VentanaRegistrarPrestamo extends JFrame {
         panelInferior.add(labelUsuario);
         panelInferior.add(campoUsuario);
 
-        // espacio vacío estético
         panelInferior.add(new JLabel(""));
         panelInferior.add(btnRegistrar);
 
         add(panelInferior, BorderLayout.SOUTH);
 
 
-        // ------------------------
-        //  ACCIÓN DEL BOTÓN
-        // ------------------------
         btnRegistrar.addActionListener(e -> {
 
             int fila = tablaLibros.getSelectedRow();
@@ -83,7 +73,6 @@ public class VentanaRegistrarPrestamo extends JFrame {
             String idLibro = tablaLibros.getValueAt(fila, 0).toString();
             String disponible = tablaLibros.getValueAt(fila, 4).toString();
 
-            // Validar disponibilidad
             if (!disponible.equals("Sí")) {
                 JOptionPane.showMessageDialog(this,
                         "El libro NO está disponible.",
@@ -92,10 +81,8 @@ public class VentanaRegistrarPrestamo extends JFrame {
                 return;
             }
 
-            // 1️⃣ Registrar préstamo en JSON
             ServicioPrestamo.registrarPrestamo(idLibro, usuario);
 
-            // 2️⃣ Cambiar disponibilidad del libro
             ServicioLibro.actualizarDisponibilidad(idLibro, false);
 
             JOptionPane.showMessageDialog(this,
@@ -103,7 +90,6 @@ public class VentanaRegistrarPrestamo extends JFrame {
                     "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            // Actualizamos la tabla
             modeloTabla.setRowCount(0);
             cargarLibros();
         });
@@ -111,10 +97,6 @@ public class VentanaRegistrarPrestamo extends JFrame {
         setVisible(true);
     }
 
-
-    // ------------------------
-    // Cargar la tabla de libros
-    // ------------------------
     private void cargarLibros() {
         List<Libro> libros = ServicioLibro.obtenerTodos();
 

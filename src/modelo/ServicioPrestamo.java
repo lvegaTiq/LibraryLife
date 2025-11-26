@@ -11,9 +11,6 @@ public class ServicioPrestamo {
 
     private static final String ARCHIVO = "prestamos.json";
 
-    // -------------------------------
-    // 1. REGISTRAR PRÉSTAMO
-    // -------------------------------
     public static void registrarPrestamo(String idLibro, String idCliente) {
 
         JSONObject prestamoJson = new JSONObject();
@@ -31,9 +28,6 @@ public class ServicioPrestamo {
         System.out.println("✔ Préstamo registrado correctamente");
     }
 
-    // -------------------------------------
-    // 2. OBTENER PRÉSTAMOS POR USUARIO
-    // -------------------------------------
     public static List<Prestamo> obtenerPrestamosPorUsuario(String usuario) {
 
         List<Prestamo> lista = new ArrayList<>();
@@ -51,7 +45,6 @@ public class ServicioPrestamo {
                         idCliente,
                         LocalDate.parse((String) json.get("fechaPrestamo"))
                 );
-                // agregar fecha límite
                 p.setFechaDevolucion(LocalDate.parse((String) json.get("fechaLimite")));
 
                 lista.add(p);
@@ -60,10 +53,6 @@ public class ServicioPrestamo {
 
         return lista;
     }
-
-    // -------------------------------------
-    // 3. MARCAR DEVUELTO
-    // -------------------------------------
     public static void marcarComoDevuelto(String idLibro) {
 
         JSONArray array = JsonDB.leer(ARCHIVO);
@@ -80,4 +69,33 @@ public class ServicioPrestamo {
 
         JsonDB.escribir(ARCHIVO, array);
     }
+    public static List<Prestamo> obtenerTodosLosPrestamos() {
+
+    List<Prestamo> lista = new ArrayList<>();
+    JSONArray prestamosJson = JsonDB.leer("prestamos.json");
+
+    for (Object obj : prestamosJson) {
+
+        JSONObject json = (JSONObject) obj;
+
+        Prestamo p = new Prestamo(
+                (String) json.get("idPrestamo"),
+                (String) json.get("idLibro"),
+                (String) json.get("idCliente"),
+                java.time.LocalDate.parse((String) json.get("fechaPrestamo"))
+        );
+
+        p.setFechaDevolucion(java.time.LocalDate.parse((String) json.get("fechaLimite")));
+
+        if (json.containsKey("devuelto")) {
+            boolean devuelto = (boolean) json.get("devuelto");
+            if (devuelto) p.registrarDevolucion();
+        }
+
+        lista.add(p);
+    }
+
+    return lista;
+}
+
 }

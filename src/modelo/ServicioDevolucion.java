@@ -7,7 +7,6 @@ import java.util.UUID;
 
 public class ServicioDevolucion {
 
-    // Método para registrar una devolución
     public void registrarDevolucion(Prestamo prestamo) {
         if (prestamo != null) {
            
@@ -46,12 +45,9 @@ public class ServicioDevolucion {
         }
     }
 
-    // Método para obtener todas las devoluciones (desde el archivo JSON)
     public JSONArray obtenerDevoluciones() {
         return JsonDB.leer("devoluciones.json");
     }
-
-    // Método para buscar una devolución por ID
     public Devolucion buscarDevolucionPorId(String idDevolucion) {
         JSONArray devolucionesJson = JsonDB.leer("devoluciones.json");
         for (Object obj : devolucionesJson) {
@@ -67,6 +63,6 @@ public class ServicioDevolucion {
                 );
             }
         }
-        return null;  // Si no se encuentra la devolución
+        return null;
     }
 }

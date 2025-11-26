@@ -27,7 +27,6 @@ public class VentanaMenuCliente extends JFrame {
 
         JTabbedPane pestañas = new JTabbedPane();
 
-        // Panel Libros
         JPanel panelLibros = new JPanel();
 
         JButton btnPrestar = new JButton("Prestar Libro");
@@ -40,7 +39,6 @@ public class VentanaMenuCliente extends JFrame {
 
         pestañas.addTab("📚 Libros", panelLibros);
 
-        // Panel perfil
         JPanel panelPerfil = new JPanel(new GridLayout(6, 1, 10, 10));
         panelPerfil.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
         panelPerfil.add(new JLabel("Nombre: " + usuario.getNombreCompleto()));
@@ -50,21 +48,18 @@ public class VentanaMenuCliente extends JFrame {
         panelPerfil.add(new JLabel("Rol: " + usuario.getRol()));
         pestañas.addTab("👤 Mi perfil", panelPerfil);
 
-        // Cerrar sesión
         JButton btnCerrarSesion = new JButton("Cerrar sesión");
         btnCerrarSesion.addActionListener(e -> {
             dispose();
             new VentanaInicio().setVisible(true);
         });
+
         pestañas.addTab("Cerrar sesión", btnCerrarSesion);
 
         add(pestañas);
         setVisible(true);
     }
 
-    // ==========================================================
-    // MOSTRAR LIBROS DISPONIBLES PARA PRESTAR
-    // ==========================================================
     private void mostrarLibrosDisponibles() {
 
         JDialog ventana = new JDialog(this, "Libros Disponibles", true);
@@ -78,7 +73,6 @@ public class VentanaMenuCliente extends JFrame {
         JTable tabla = new JTable(modelo);
         ventana.add(new JScrollPane(tabla));
 
-        // Cargar todos los libros disponibles
         List<Libro> libros = ServicioLibro.obtenerTodos()
                 .stream()
                 .filter(Libro::isDisponible)
@@ -99,10 +93,6 @@ public class VentanaMenuCliente extends JFrame {
 
         ventana.setVisible(true);
     }
-
-    // ==========================================================
-    // MOSTRAR LIBROS PRESTADOS PARA DEVOLVER
-    // ==========================================================
     private void mostrarLibrosPrestados() {
 
         JDialog ventana = new JDialog(this, "Mis Libros Prestados", true);
@@ -127,7 +117,7 @@ public class VentanaMenuCliente extends JFrame {
                     libro.getTitulo(),
                     libro.getAutor(),
                     p.getFechaPrestamo(),
-                    p.getFechaDevolucion(), // FECHA LÍMITE
+                    p.getFechaDevolucion(),
                     "Devolver"
             });
         }
@@ -139,10 +129,6 @@ public class VentanaMenuCliente extends JFrame {
     }
 }
 
-
-// ============================================================================
-// RENDERER / EDITOR PRESTAR
-// ============================================================================
 class ButtonRendererPrestar extends JButton implements TableCellRenderer {
     public ButtonRendererPrestar() { setOpaque(true); }
     @Override
@@ -170,11 +156,10 @@ class ButtonEditorPrestar extends DefaultCellEditor {
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value,
-            boolean selected, int row, int col) {
+        boolean selected, int row, int col) {
 
         idLibro = table.getValueAt(row, 0).toString();
         titulo  = table.getValueAt(row, 1).toString();
-
         clicked = true;
         return button;
     }
@@ -197,7 +182,6 @@ class ButtonEditorPrestar extends DefaultCellEditor {
         SwingUtilities.getWindowAncestor(button).dispose();
     }
 }
-
 
 class ButtonRendererDevolver extends JButton implements TableCellRenderer {
     public ButtonRendererDevolver() { setOpaque(true); }

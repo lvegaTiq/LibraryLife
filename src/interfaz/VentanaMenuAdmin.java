@@ -26,27 +26,27 @@ public class VentanaMenuAdmin extends JFrame {
         JButton btnVerUsuarios = new JButton("📋 Consultar Usuarios");
         JButton btnVerLibros = new JButton("📚 Consultar Libros");
         JButton btnRegistrarLibro = new JButton("➕ Registrar Libro");
+        JButton btnLibrosPrestados = new JButton("📚 Libro Prestado");
         JButton btnCerrarSesion = new JButton("Cerrar Sesión");
 
         panelBotones.add(btnVerUsuarios);
         panelBotones.add(btnVerLibros);
         panelBotones.add(btnRegistrarLibro);
+        panelBotones.add(btnLibrosPrestados);
         panelBotones.add(btnCerrarSesion);
 
         add(panelBotones, BorderLayout.CENTER);
 
-        // Acciones de los botones (puedes reemplazar por abrir otras ventanas o diálogos)
         btnVerUsuarios.addActionListener(e -> new VentanaConsultaInteractiva("Usuarios", usuarioLogeado).setVisible(true));
         btnVerLibros.addActionListener(e -> new VentanaConsultaInteractiva("Libros", usuarioLogeado).setVisible(true));
         btnRegistrarLibro.addActionListener(e -> new VentanaRegistroLibro().setVisible(true));
+        btnLibrosPrestados.addActionListener(e -> new VentanaPrestamoLibrosAdmin().setVisible(true));
         btnCerrarSesion.addActionListener(e -> cerrarSesion());
 
     }
     private void cerrarSesion() {
-        // Cerrar la ventana actual
         dispose();
         
-        // Abrir la ventana de login
         new VentanaInicio().setVisible(true);
     }
 }

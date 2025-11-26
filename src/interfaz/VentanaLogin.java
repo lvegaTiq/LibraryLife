@@ -1,5 +1,4 @@
 package interfaz;
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,9 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import modelo.Usuario;
-
 import java.io.*;
 import java.nio.file.*;
 import java.io.IOException;
@@ -153,7 +150,6 @@ public class VentanaLogin extends JFrame {
                         JOptionPane.showMessageDialog(this, "Bienvenido, " + usuario);
                         dispose();
                     
-                        // Crear el objeto Usuario
                         Usuario usuarioLogeado = new Usuario(nombreCompleto, correo, userName, telefono, rol);
                     
                         if (rol.equalsIgnoreCase("administrador")) {

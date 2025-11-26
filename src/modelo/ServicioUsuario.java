@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public class ServicioUsuario {
 
-    // Método para registrar un nuevo usuario
     public static void registrarUsuario(Usuario usuario) {
         JSONArray usuarios = JsonDB.leer("usuarios.json");
 
@@ -25,7 +24,6 @@ public class ServicioUsuario {
         JsonDB.escribir("usuarios.json", usuarios);
     }
 
-    // Método de login
     public static Usuario login(String usuario, String contrasena) {
         JSONArray usuarios = JsonDB.leer("usuarios.json");
 

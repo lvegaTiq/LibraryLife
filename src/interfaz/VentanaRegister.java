@@ -14,7 +14,7 @@ public class VentanaRegister extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(245, 245, 245)); // Fondo suave
+        panel.setBackground(new Color(245, 245, 245));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 20, 10, 20);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -26,7 +26,6 @@ public class VentanaRegister extends JFrame {
         lblTitulo.setForeground(new Color(60, 60, 60));
         panel.add(lblTitulo, gbc);
 
-        // Campos
         JTextField txtNombre = new JTextField();
         JTextField txtCorreo = new JTextField();
         JTextField txtUsuario = new JTextField();
@@ -40,7 +39,6 @@ public class VentanaRegister extends JFrame {
         gbc.gridy = 4; addCampo(panel, gbc, "Contraseña:", txtPassword);
         gbc.gridy = 5; addCampo(panel, gbc, "Teléfono:", txtTelefono);
 
-        // Botón
         gbc.gridy = 6;
         btnRegistrar.setBackground(new Color(33, 150, 243));
         btnRegistrar.setForeground(Color.WHITE);
@@ -50,7 +48,6 @@ public class VentanaRegister extends JFrame {
 
         add(panel);
 
-        // Acción del botón
         btnRegistrar.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             String correo = txtCorreo.getText().trim();
@@ -58,29 +55,24 @@ public class VentanaRegister extends JFrame {
             String contrasena = new String(txtPassword.getPassword());
             String telefono = txtTelefono.getText().trim();
 
-            // Validación de campos vacíos
             if (nombre.isEmpty() || correo.isEmpty() || usuario.isEmpty() || contrasena.isEmpty() || telefono.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Por favor completa todos los campos");
                 return;
             }
 
-            // Validación de formato de correo
             if (!correo.contains("@")) {
                 JOptionPane.showMessageDialog(this, "Por favor ingresa un correo válido.");
                 return;
             }
 
-            // Crear nuevo usuario
             Usuario nuevoUsuario = new Usuario(nombre, correo, usuario, contrasena, telefono);
 
-            // Verificar si el usuario ya existe
             if (ServicioUsuario.login(usuario, contrasena) != null) {
                 JOptionPane.showMessageDialog(this, "El usuario ya existe.");
             } else {
-                // Registrar nuevo usuario
                 ServicioUsuario.registrarUsuario(nuevoUsuario);
                 JOptionPane.showMessageDialog(this, "Registro exitoso. Ahora puedes iniciar sesión.");
-                dispose();  // Cerrar ventana de registro
+                dispose(); 
             }
         });
     }

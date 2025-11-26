@@ -11,13 +11,12 @@ import org.json.simple.parser.ParseException;
 
 public class JsonDB {
 
-    // Método para leer un archivo JSON
     public static JSONArray leer(String ruta) {
         try {
             File file = new File(ruta);
             if (!file.exists()) {
                 file.createNewFile();
-                escribir(ruta, new JSONArray()); // Crear JSON vacío
+                escribir(ruta, new JSONArray());
             }
 
             FileReader reader = new FileReader(file);
@@ -32,7 +31,6 @@ public class JsonDB {
         }
     }
 
-    // Método para escribir en el archivo JSON
     public static void escribir(String ruta, JSONArray data) {
         try (FileWriter file = new FileWriter(ruta)) {
             file.write(data.toJSONString());

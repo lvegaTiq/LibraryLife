@@ -5,8 +5,6 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class VentanaInicio extends JFrame {
-
-    // Clase interna para el botón con transición y bordes redondeados
     class BotonAnimado extends JButton {
         private Color colorInicial = new Color(178, 210, 197);
         private Color colorHover = new Color(140, 180, 160);
@@ -88,7 +86,6 @@ public class VentanaInicio extends JFrame {
         titulo.setFont(new Font("Calibri", Font.BOLD, 24));
         panel.add(titulo);
 
-        // Usamos los nuevos botones animados
         BotonAnimado btnLogin = new BotonAnimado("Iniciar Sesión");
         btnLogin.setBounds(500, 20, 150, 40);
         panel.add(btnLogin);

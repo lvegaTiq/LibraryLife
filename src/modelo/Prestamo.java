@@ -9,7 +9,6 @@ public class Prestamo {
     private LocalDate fechaDevolucion;
     private boolean devuelto;
 
-    // Constructor
     public Prestamo(String idPrestamo, String idLibro, String idCliente, LocalDate fechaPrestamo) {
         this.idPrestamo = idPrestamo;
         this.idLibro = idLibro;
@@ -23,7 +22,6 @@ public class Prestamo {
         this.fechaDevolucion = LocalDate.now(); 
     }
 
-    // Getters y Setters
     public String getIdPrestamo() {
         return idPrestamo;
     }

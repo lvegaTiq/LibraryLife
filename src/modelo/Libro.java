@@ -7,7 +7,6 @@ public class Libro {
     private String categoria;
     private boolean disponible;
 
-    // Constructor completo (incluye id)
     public Libro(String id, String titulo, String autor, String categoria, boolean disponible) {
         this.id = id;
         this.titulo = titulo;
@@ -16,7 +15,6 @@ public class Libro {
         this.disponible = disponible;
     }
 
-    // Constructor sin id (puedes generar id más tarde)
     public Libro(String titulo, String autor, String categoria, boolean disponible) {
         this.id = java.util.UUID.randomUUID().toString();
         this.titulo = titulo;
@@ -25,7 +23,6 @@ public class Libro {
         this.disponible = disponible;
     }
 
-    // Getters
     public String getId() {
         return id;
     }
@@ -46,7 +43,6 @@ public class Libro {
         return disponible;
     }
 
-    // Setters (incluido setDisponible)
     public void setId(String id) {
         this.id = id;
     }

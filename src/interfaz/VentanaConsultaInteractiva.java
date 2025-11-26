@@ -20,7 +20,6 @@ public class VentanaConsultaInteractiva extends JFrame {
     private JSONArray datosJSON;
     private String tipoArchivo;
 
-    // Agregar JTextArea para mostrar el árbol
     private JTextArea areaArbol;
 
     public VentanaConsultaInteractiva(String tipo, Usuario usuarioLogeado) {
@@ -45,13 +44,11 @@ public class VentanaConsultaInteractiva extends JFrame {
         add(new JScrollPane(tabla), BorderLayout.CENTER);
         add(panelBotones, BorderLayout.SOUTH);
 
-        // Crear el área de texto para mostrar el árbol
         areaArbol = new JTextArea(10, 40);
         areaArbol.setEditable(false);
         JScrollPane scrollArbol = new JScrollPane(areaArbol);
         add(scrollArbol, BorderLayout.EAST);
 
-        // SOLO construir árbol si estamos consultando usuarios
     if (tipoArchivo.equals("usuarios.json")) {
 
         ArbolUser arbolUser = new ArbolUser();
@@ -81,7 +78,7 @@ public class VentanaConsultaInteractiva extends JFrame {
         btnRegresar.addActionListener(e -> {
             VentanaMenuAdmin ventanaMenuAdmin = new VentanaMenuAdmin(usuarioLogeado);
             ventanaMenuAdmin.setVisible(true);
-            dispose(); // Cierra la ventana actual si es necesario
+            dispose();
         });
     }
 
@@ -96,9 +93,8 @@ public class VentanaConsultaInteractiva extends JFrame {
     
         try {
             Path path = Paths.get(tipoArchivo);
-            // Verificar si el archivo existe, si no, crearlo vacío
             if (!Files.exists(path)) {
-                Files.writeString(path, "[]"); // Crear un archivo JSON vacío si no existe
+                Files.writeString(path, "[]");
             }
     
             String contenido = Files.readString(path);
@@ -142,16 +138,16 @@ public class VentanaConsultaInteractiva extends JFrame {
                     obj.put("categoria", modeloTabla.getValueAt(i, 2));
                     obj.put("disponible", modeloTabla.getValueAt(i, 3));
                 } else if (tipoArchivo.equals("usuarios.json")) {
-                    obj.put("nombreCompleto", modeloTabla.getValueAt(i, 0)); // Corregido
-                    obj.put("correo", modeloTabla.getValueAt(i, 1)); // Corregido
-                    obj.put("usuario", modeloTabla.getValueAt(i, 2)); // Corregido
-                    obj.put("telefono", modeloTabla.getValueAt(i, 3)); // Corregido
+                    obj.put("nombreCompleto", modeloTabla.getValueAt(i, 0)); 
+                    obj.put("correo", modeloTabla.getValueAt(i, 1));
+                    obj.put("usuario", modeloTabla.getValueAt(i, 2));
+                    obj.put("telefono", modeloTabla.getValueAt(i, 3));
                 }
                 nuevoArray.add(obj);
             }
     
             Files.writeString(Paths.get(tipoArchivo), nuevoArray.toJSONString());
-            cargarDatos(); // Recargar los datos después de guardar
+            cargarDatos();
     
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error al guardar cambios: " + e.getMessage());
@@ -192,7 +188,7 @@ public class VentanaConsultaInteractiva extends JFrame {
             return;
         }
 
-        modeloTabla.setValueAt(false, row, 3); // Cambiar el valor de "Disponible" o "Activo" a false
+        modeloTabla.setValueAt(false, row, 3);
         guardarCambios();
     }
 }
