@@ -6,6 +6,7 @@ import modelo.ServicioLibro;
 import modelo.Usuario;
 
 import javax.swing.*;
+import javax.swing.table.*;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class VentanaMenuCliente extends JFrame {
 
             JTabbedPane pestañas = new JTabbedPane();
 
-            // Pestaña Libros
+            // Pestaña Librosprestar
             JButton btnPrestarLibro = new JButton("Prestar Libro");
             btnPrestarLibro.addActionListener(e -> mostrarLibrosDisponibles());
 
@@ -33,7 +34,6 @@ public class VentanaMenuCliente extends JFrame {
 
             pestañas.addTab("📚 Libros", panelLibros);
 
-            // Pestaña Perfil
             JPanel panelPerfil = new JPanel(new GridLayout(6, 1, 10, 10));
             panelPerfil.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
             panelPerfil.add(new JLabel("Nombre: " + usuario.getNombreCompleto()));
@@ -44,7 +44,6 @@ public class VentanaMenuCliente extends JFrame {
 
             pestañas.addTab("👤 Mi perfil", panelPerfil);
 
-            // Pestaña de Cerrar sesión
             JButton btnCerrarSesion = new JButton("Cerrar sesión");
             btnCerrarSesion.addActionListener(e -> cerrarSesion());
             pestañas.addTab("Cerrar sesión", btnCerrarSesion);
@@ -59,62 +58,110 @@ public class VentanaMenuCliente extends JFrame {
 
     private void cerrarSesion() {
         dispose();
-        new VentanaInicio().setVisible(true); // Aquí se abriría la ventana de inicio de sesión.
+        new VentanaInicio().setVisible(true);
     }
-
     private void mostrarLibrosDisponibles() {
-        // Obtener la lista de libros disponibles
-        List<Libro> librosDisponibles = ServicioLibro.obtenerLibrosDisponibles();
         
-        // Verificar si la lista está vacía
-        if (librosDisponibles == null || librosDisponibles.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No se pudo cargar la lista de libros.");
-            return;
-        }
+        JDialog ventana = new JDialog(this, "Libros Disponibles", true);
+        ventana.setSize(750, 400);
+        ventana.setLocationRelativeTo(this);
         
-        // Filtrar los libros que están disponibles (disponible == true)
-        List<Libro> librosDisponiblesFiltro = librosDisponibles.stream()
-                .filter(Libro::isDisponible) // Solo libros disponibles
+        DefaultTableModel modelo = new DefaultTableModel(
+                new Object[]{"ID", "Titulo", "Autor", "Estado", "Acción"}, 0
+        );
+    
+        JTable tabla = new JTable(modelo);
+        ventana.add(new JScrollPane(tabla));
+    
+        // ✔ AQUÍ EL CAMBIO IMPORTANTE
+        List<Libro> libros = ServicioLibro.obtenerTodos();  // NO obtenerLibrosDisponibles()
+    
+        // Filtrar disponibles
+        libros = libros.stream()
+                .filter(Libro::isDisponible)
                 .collect(Collectors.toList());
-        
-        // Verificar si hay libros disponibles para prestar
-        if (librosDisponiblesFiltro.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay libros disponibles para préstamo.");
-            return;
+    
+        for (Libro libro : libros) {
+            modelo.addRow(new Object[]{
+                    libro.getId(),
+                    libro.getTitulo(),
+                    libro.getAutor(),
+                    libro.isDisponible() ? "Disponible" : "No disponible",
+                    "Prestar"
+            });
         }
-        
-        // Crear un array para mostrar títulos y autores
-        String[] librosArray = new String[librosDisponiblesFiltro.size()];
-        for (int i = 0; i < librosDisponiblesFiltro.size(); i++) {
-            Libro libro = librosDisponiblesFiltro.get(i);
-            librosArray[i] = libro.getTitulo() + " - " + libro.getAutor();  // Título y autor
-        }
-        
-        // Mostrar un cuadro de diálogo para seleccionar un libro
-        String libroSeleccionado = (String) JOptionPane.showInputDialog(this,
-                "Selecciona el libro para prestar",
-                "Préstamo de Libro",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                librosArray,
-                librosArray[0]);
-        
-        if (libroSeleccionado != null) {
-            // Buscar el libro en la lista filtrada de libros disponibles
-            Libro libro = null;
-            for (Libro l : librosDisponiblesFiltro) {
-                if (libroSeleccionado.contains(l.getTitulo())) {
-                    libro = l;  // Encontrar el libro seleccionado por el usuario
-                    break;
-                }
-            }
-            
-            if (libro != null) {
-                // Llamar al método para actualizar la disponibilidad del libro
-                ServicioLibro.actualizarDisponibilidad(libro.getId(), false);  // Marcar como no disponible
-                JOptionPane.showMessageDialog(this, "El libro '" + libro.getTitulo() + "' ha sido prestado exitosamente.");
-            }
-        }
+    
+        tabla.getColumn("Acción").setCellRenderer(new ButtonRenderer());
+        tabla.getColumn("Acción").setCellEditor(new ButtonEditor(new JCheckBox()));
+    
+        ventana.setVisible(true);
     }
 
+}
+
+class ButtonRenderer extends JButton implements TableCellRenderer {
+
+    public ButtonRenderer() {
+        setOpaque(true);
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+                                                   boolean isSelected, boolean hasFocus,
+                                                   int row, int col) {
+        String estado = table.getValueAt(row, 3).toString();
+
+        setText(estado.equals("Disponible") ? "Prestar" : "No disponible");
+        setEnabled(estado.equals("Disponible"));
+
+        return this;
+    }
+}
+class ButtonEditor extends DefaultCellEditor {
+
+    private JButton button;
+    private String idLibro;
+    private String titulo;
+    private boolean clicked;
+
+    public ButtonEditor(JCheckBox checkBox) {
+        super(checkBox);
+
+        button = new JButton();
+        button.setOpaque(true);
+
+        button.addActionListener(e -> fireEditingStopped());
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value,
+                                                 boolean isSelected, int row, int col) {
+
+        idLibro = table.getValueAt(row, 0).toString();
+        titulo = table.getValueAt(row, 1).toString();
+
+        String estado = table.getValueAt(row, 3).toString();
+        button.setText(estado.equals("Disponible") ? "Prestar" : "No disponible");
+        button.setEnabled(estado.equals("Disponible"));
+
+        clicked = true;
+        return button;
+    }
+
+    @Override
+    public Object getCellEditorValue() {
+        if (clicked) {
+            registrarPrestamo();
+        }
+        clicked = false;
+        return "Prestar";
+    }
+
+    private void registrarPrestamo() {
+
+        ServicioLibro.actualizarDisponibilidad(idLibro, false);
+
+        JOptionPane.showMessageDialog(button,
+                "El libro '" + titulo + "' se ha prestado correctamente.");
+    }
 }
