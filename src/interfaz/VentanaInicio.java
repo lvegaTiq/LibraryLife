@@ -5,53 +5,55 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class VentanaInicio extends JFrame {
+
     class BotonAnimado extends JButton {
-        private Color colorInicial = new Color(178, 210, 197);
-        private Color colorHover = new Color(140, 180, 160);
+        private Color baseColor = new Color(0, 120, 215);
+        private Color hoverColor = new Color(30, 150, 245);
         private Timer timer;
 
         public BotonAnimado(String text) {
             super(text);
-            setBackground(colorInicial);
             setForeground(Color.WHITE);
             setFocusPainted(false);
             setBorderPainted(false);
             setContentAreaFilled(false);
-            setFont(new Font("Arial", Font.BOLD, 14));
+            setFont(new Font("Arial", Font.BOLD, 15));
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+            setPreferredSize(new Dimension(150, 45));
 
             addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseEntered(MouseEvent e) {
-                    animarColor(colorInicial, colorHover);
+                    animar(baseColor, hoverColor);
                 }
 
+                @Override
                 public void mouseExited(MouseEvent e) {
-                    animarColor(colorHover, colorInicial);
+                    animar(hoverColor, baseColor);
                 }
             });
         }
 
-        private void animarColor(Color from, Color to) {
+        private void animar(Color from, Color to) {
             if (timer != null && timer.isRunning()) timer.stop();
 
-            final int steps = 10;
-            final int delay = 20;
-
-            timer = new Timer(delay, null);
+            timer = new Timer(20, null);
             timer.addActionListener(new ActionListener() {
                 int step = 0;
+                final int steps = 10;
 
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     float ratio = (float) step / steps;
                     int r = (int) (from.getRed() + ratio * (to.getRed() - from.getRed()));
                     int g = (int) (from.getGreen() + ratio * (to.getGreen() - from.getGreen()));
                     int b = (int) (from.getBlue() + ratio * (to.getBlue() - from.getBlue()));
+
                     setBackground(new Color(r, g, b));
                     repaint();
 
                     step++;
-                    if (step > steps) {
-                        timer.stop();
-                    }
+                    if (step > steps) timer.stop();
                 }
             });
 
@@ -63,84 +65,101 @@ public class VentanaInicio extends JFrame {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(getBackground());
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30); // Border radius
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
             super.paintComponent(g);
             g2.dispose();
         }
     }
 
     public VentanaInicio() {
-        setTitle("Bienvenido al sistema de biblioteca");
-        setSize(900, 700);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        setTitle("Sistema de Biblioteca");
+        setSize(1000, 650);
         setLocationRelativeTo(null);
-        setLayout(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        panel.setBackground(new Color(245, 245, 245));
-        panel.setBounds(0, 0, 900, 700);
+        JPanel barraSuperior = new JPanel(new BorderLayout());
+        barraSuperior.setBackground(new Color(10, 73, 123));
+        barraSuperior.setPreferredSize(new Dimension(1000, 70));
 
-        JLabel titulo = new JLabel("Sistema de Biblioteca");
-        titulo.setBounds(50, 30, 400, 30);
-        titulo.setFont(new Font("Calibri", Font.BOLD, 24));
-        panel.add(titulo);
+        JLabel tituloPrincipal = new JLabel("Biblioteca Volviendo a Leer", JLabel.LEFT);
+        tituloPrincipal.setForeground(Color.WHITE);
+        tituloPrincipal.setFont(new Font("SansSerif", Font.BOLD, 26));
+        tituloPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
+        barraSuperior.add(tituloPrincipal, BorderLayout.WEST);
+
+        JPanel panelBotonesTop = new JPanel();
+        panelBotonesTop.setOpaque(false);
 
         BotonAnimado btnLogin = new BotonAnimado("Iniciar Sesión");
-        btnLogin.setBounds(500, 20, 150, 40);
-        panel.add(btnLogin);
-
         BotonAnimado btnRegister = new BotonAnimado("Registrarse");
-        btnRegister.setBounds(655, 20, 150, 40);
-        panel.add(btnRegister);
 
-        btnLogin.addActionListener(e -> {
-            new VentanaLogin().setVisible(true);  
-            dispose();
-        });
-        btnRegister.addActionListener(e -> {
-            VentanaRegister registro = new VentanaRegister();
-            registro.setVisible(true);
-        });
-        
-        add(panel);
-    
-        ImageIcon icon = new ImageIcon(getClass().getResource("/interfaz/niños.jpg"));
-        Image img = icon.getImage().getScaledInstance(300, 200, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(img);
-        JLabel imagenLabel = new  JLabel(scaledIcon);
-        imagenLabel.setBounds(530, 220, 300, 200);
+        panelBotonesTop.add(btnLogin);
+        panelBotonesTop.add(btnRegister);
+        barraSuperior.add(panelBotonesTop, BorderLayout.EAST);
 
-        JLabel lblInfo = new JLabel("Sobre la biblioteca");
-        lblInfo.setBounds(50, 50, 300, 305);
-        lblInfo.setFont(new Font("Calibri", Font.BOLD, 20));
-        panel.add(lblInfo);
+        add(barraSuperior, BorderLayout.NORTH);
+
+        JPanel panelCentral = new JPanel(null);
+        panelCentral.setBackground(new Color(240, 245, 250));
+        add(panelCentral, BorderLayout.CENTER);
+
+        JLabel titulo = new JLabel("Descubre nuestra biblioteca digital");
+        titulo.setBounds(50, 80, 600, 50);
+        titulo.setFont(new Font("Calibri", Font.BOLD, 38));
+        panelCentral.add(titulo);
 
         JPanel contenedorTexto = new JPanel();
         contenedorTexto.setLayout(new BorderLayout());
-        contenedorTexto.setBounds(50, 230, 450, 200);
-        contenedorTexto.setBackground(new Color(250, 250, 250));
-        contenedorTexto.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+        contenedorTexto.setBounds(50, 230, 450, 230);
+
+        contenedorTexto.setBackground(new Color(235, 240, 245));
+
+        contenedorTexto.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
         JTextArea txtInfo = new JTextArea(
-            "Biblioteca \"Volviendo a Leer\"\n\n"+
-            "Fundada en 1985 con el sueño de darle la oportunidad a personas que necesitan los recursos y les interese explorar los recursos que necesiten o les guste. Comenzamos con 300 libros donados y hoy en dia contamos con mas de 20,000 titulos. \n\n"+
-            "Se ofrecen salas digitales en donde se prestan equipos para que se puedan hacer consultas sobre algun tema de interes o algo que desee buscar.\n\n"
+            "Biblioteca \"Volviendo a Leer\"\n" +
+            "Fundada en 1985 con el sueño de darle la oportunidad a personas que necesitan\n" +
+            "los recursos y les interese explorar lo que requieran o disfruten. Comenzamos\n" +
+            "con 300 libros donados y hoy en día contamos con más de 20,000 títulos.\n" +
+            "Se ofrecen salas digitales donde se prestan equipos para realizar consultas\n" +
+            "sobre algún tema de interés, tareas o investigación personal.\n"
         );
+
         txtInfo.setLineWrap(true);
         txtInfo.setWrapStyleWord(true);
         txtInfo.setEditable(false);
-        txtInfo.setFont(new Font("Arial", Font.PLAIN, 14));
-        txtInfo.setBounds(50, 230, 450, 200);
+        txtInfo.setFont(new Font("Arial", Font.PLAIN, 15));
+        txtInfo.setForeground(new Color(30, 30, 30));
+        txtInfo.setOpaque(false);
+
         contenedorTexto.add(txtInfo, BorderLayout.CENTER);
-        panel.add(imagenLabel);
-        panel.add(contenedorTexto);
+        
+        panelCentral.add(contenedorTexto);
+
+
+        ImageIcon icon = new ImageIcon(getClass().getResource("/interfaz/niños.jpg"));
+        Image img = icon.getImage().getScaledInstance(400, 300, Image.SCALE_SMOOTH);
+        JLabel imagenLabel = new JLabel(new ImageIcon(img));
+        imagenLabel.setBounds(550, 180, 400, 300);
+        panelCentral.add(imagenLabel);
+
+        btnLogin.addActionListener(e -> {
+            new VentanaLogin().setVisible(true);
+            dispose();
+        });
+
+        btnRegister.addActionListener(e -> {
+            new VentanaRegister().setVisible(true);
+        });
+
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            VentanaInicio ventana = new VentanaInicio();
-            ventana.setVisible(true);
+            new VentanaInicio().setVisible(true);
         });
     }
 }

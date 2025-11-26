@@ -1,183 +1,189 @@
 package interfaz;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import org.json.simple.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import modelo.Usuario;
-import java.io.*;
+import javax.swing.border.*;
 import java.nio.file.*;
-import java.io.IOException;
-import org.json.*;
-
+import modelo.Usuario;
+import org.json.simple.*;
+import org.json.simple.parser.*;
 
 public class VentanaLogin extends JFrame {
 
-    class BotonAnimado extends JButton {
-        private Color colorInicial = new Color(170, 206, 217);
-        private Color colorHover = new Color(153, 200, 215);
-        private Timer timer;
-
-        public BotonAnimado(String text) {
-            super(text);
-            setBackground(colorInicial);
-            setForeground(Color.WHITE);
-            setFocusPainted(false);
-            setBorderPainted(false);
-            setContentAreaFilled(false);
-            setFont(new Font("Arial", Font.BOLD, 14));
-
-            addMouseListener(new MouseAdapter() {
-                public void mouseEntered(MouseEvent e) {
-                    animarColor(colorInicial, colorHover);
-                }
-
-                public void mouseExited(MouseEvent e) {
-                    animarColor(colorHover, colorInicial);
-                }
-            });
-        }
-
-        private void animarColor(Color from, Color to) {
-            if (timer != null && timer.isRunning()) timer.stop();
-
-            final int steps = 10;
-            final int delay = 20;
-
-            timer = new Timer(delay, null);
-            timer.addActionListener(new ActionListener() {
-                int step = 0;
-
-                public void actionPerformed(ActionEvent e) {
-                    float ratio = (float) step / steps;
-                    int r = (int) (from.getRed() + ratio * (to.getRed() - from.getRed()));
-                    int g = (int) (from.getGreen() + ratio * (to.getGreen() - from.getGreen()));
-                    int b = (int) (from.getBlue() + ratio * (to.getBlue() - from.getBlue()));
-                    setBackground(new Color(r, g, b));
-                    repaint();
-
-                    step++;
-                    if (step > steps) {
-                        timer.stop();
-                    }
-                }
-            });
-
-            timer.start();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(getBackground());
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-            super.paintComponent(g);
-            g2.dispose();
-        }
-    }
-
     public VentanaLogin() {
+
         setTitle("Login");
-        setSize(450, 400);
+        setSize(500, 420);
+        setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(231, 233, 232));
+        JPanel fondo = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(
+                        0, 0, new Color(40, 50, 70),
+                        0, getHeight(), new Color(15, 20, 35)
+                );
+                g2.setPaint(gp);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        fondo.setLayout(null);
+        add(fondo);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
+        JPanel loginPanel = new JPanel();
+        loginPanel.setLayout(null);
+        loginPanel.setBounds(110, 60, 280, 280);
 
-        JLabel titulo = new JLabel("Iniciar Sesión");
-        titulo.setFont(new Font("Arial", Font.BOLD, 20));
-        titulo.setForeground(new Color(0, 0, 0));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(titulo, gbc);
+        loginPanel.setBackground(new Color(0, 0, 0));
+        loginPanel.setBorder(
+                new LineBorder(new Color(255, 255, 255, 80), 2, true)
+        );
 
-        gbc.gridwidth = 1;
-        gbc.anchor = GridBagConstraints.LINE_END;
+        fondo.add(loginPanel);
 
-        gbc.gridx = 0;
-        gbc.gridy++;
-        panel.add(new JLabel("Usuario:"), gbc);
-        gbc.gridx = 1;
-        JTextField usuarioField = new JTextField(15);
-        panel.add(usuarioField, gbc);
+        JLabel titulo = new JLabel("Login", SwingConstants.CENTER);
+        titulo.setBounds(0, 10, 280, 40);
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        titulo.setForeground(Color.white);
+        loginPanel.add(titulo);
 
-        gbc.gridx = 0;
-        gbc.gridy++;
-        panel.add(new JLabel("Contraseña:"), gbc);
-        gbc.gridx = 1;
-        JPasswordField passField = new JPasswordField(15);
-        panel.add(passField, gbc);
+        JTextField usuarioField = crearCampoTexto("Username");
+        usuarioField.setBounds(35, 70, 210, 40);
+        loginPanel.add(usuarioField);
 
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        BotonAnimado btnLogin = new BotonAnimado("Iniciar sesión");
-        panel.add(btnLogin, gbc);
+        JPasswordField passField = crearCampoPassword("Password");
+        passField.setBounds(35, 125, 210, 40);
+        loginPanel.add(passField);
+
+        JButton btnLogin = new JButton("Iniciar sesión");
+        btnLogin.setBounds(35, 190, 210, 40);
+        btnLogin.setFocusPainted(false);
+        btnLogin.setForeground(Color.WHITE);
+        btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnLogin.setBackground(new Color(70, 130, 250));
+        btnLogin.setBorder(new LineBorder(new Color(90,140,255), 2, true));
+        btnLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btnLogin.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btnLogin.setBackground(new Color(90,150,255)); }
+            public void mouseExited(MouseEvent e) { btnLogin.setBackground(new Color(70,130,250)); }
+        });
+
+        loginPanel.add(btnLogin);
 
         btnLogin.addActionListener(e -> {
-            String usuario = usuarioField.getText();
-            String contrasena = new String(passField.getPassword());
-                
+            String usuario = usuarioField.getText().trim();
+            String contrasena = new String(passField.getPassword()).trim();
+
             try {
-                String contenido = new String(Files.readAllBytes(Paths.get("usuarios.json")));
+                String contenido = Files.readString(Paths.get("usuarios.json"));
                 JSONParser parser = new JSONParser();
                 JSONArray usuarios = (JSONArray) parser.parse(contenido);
             
-                boolean encontrado = false;
-            
                 for (Object obj : usuarios) {
                     JSONObject user = (JSONObject) obj;
-                
-                    String userName = (String) user.get("usuario");
-                    String password = (String) user.get("contrasena");
-                    String rol = (String) user.get("rol");
-                    String nombreCompleto = (String) user.get("nombreCompleto");
-                    String correo = (String) user.get("correo");
-                    String telefono = (String) user.get("telefono");
-                
-                    if (userName.equals(usuario) && password.equals(contrasena)) {
-                        encontrado = true;
-                        JOptionPane.showMessageDialog(this, "Bienvenido, " + usuario);
+
+                    if (user.get("usuario").equals(usuario) &&
+                        user.get("contrasena").equals(contrasena)) {
+
+                        String rol = (String) user.get("rol");
+
+                        Usuario usuarioLogeado = new Usuario(
+                                (String) user.get("nombreCompleto"),
+                                (String) user.get("correo"),
+                                (String) user.get("usuario"),
+                                (String) user.get("contrasena"),
+                                (String) user.get("telefono"),
+                                rol
+                        );
+
+                        JOptionPane.showMessageDialog(this, "Bienvenido " + usuario);
+
                         dispose();
-                    
-                        Usuario usuarioLogeado = new Usuario(nombreCompleto, correo, userName, telefono, rol);
-                    
-                        if (rol.equalsIgnoreCase("administrador")) {
+
+                        if (rol.equalsIgnoreCase("administrador")) 
                             new VentanaMenuAdmin(usuarioLogeado).setVisible(true);
-                        } else if (rol.equalsIgnoreCase("cliente")) {
+                        else
                             new VentanaMenuCliente(usuarioLogeado).setVisible(true);
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Rol desconocido");
-                        }
-                    
-                        break;
+
+                        return;
                     }
                 }
-            
-                if (!encontrado) {
-                    JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos", "Error", JOptionPane.ERROR_MESSAGE);
+
+                JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error en login: " + ex.getMessage());
+            }
+        });
+    }
+
+
+
+    private JTextField crearCampoTexto(String placeholder) {
+        JTextField campo = new JTextField(placeholder);
+        campo.setForeground(Color.GRAY);
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        campo.setOpaque(false);
+        campo.setBorder(new MatteBorder(0, 0, 2, 0, new Color(200,200,200)));
+
+        campo.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                if (campo.getText().equals(placeholder)) {
+                    campo.setText("");
+                    campo.setForeground(Color.WHITE);
                 }
-            
-            } catch (IOException | ParseException ex) {
-                JOptionPane.showMessageDialog(this, "Error leyendo archivo JSON: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            public void focusLost(FocusEvent e) {
+                if (campo.getText().isEmpty()) {
+                    campo.setText(placeholder);
+                    campo.setForeground(Color.GRAY);
+                }
             }
         });
 
-        
-
-
-        add(panel);
+        campo.setCaretColor(Color.WHITE);
+        return campo;
     }
+
+    private JPasswordField crearCampoPassword(String placeholder) {
+        JPasswordField campo = new JPasswordField(placeholder);
+        campo.setForeground(Color.GRAY);
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        campo.setOpaque(false);
+        campo.setBorder(new MatteBorder(0, 0, 2, 0, new Color(200,200,200)));
+
+        campo.setEchoChar((char) 0);
+
+        campo.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                String text = new String(campo.getPassword());
+                if (text.equals(placeholder)) {
+                    campo.setText("");
+                    campo.setForeground(Color.WHITE);
+                    campo.setEchoChar('•');
+                }
+            }
+
+            public void focusLost(FocusEvent e) {
+                if (campo.getPassword().length == 0) {
+                    campo.setText(placeholder);
+                    campo.setForeground(Color.GRAY);
+                    campo.setEchoChar((char) 0);
+                }
+            }
+        });
+
+        campo.setCaretColor(Color.WHITE);
+        return campo;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new VentanaLogin().setVisible(true));

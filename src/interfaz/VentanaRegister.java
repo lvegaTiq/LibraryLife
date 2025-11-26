@@ -2,90 +2,174 @@ package interfaz;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import modelo.Usuario;
 import modelo.ServicioUsuario;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
+
+
 
 public class VentanaRegister extends JFrame {
 
     public VentanaRegister() {
         setTitle("Registro de Usuario");
-        setSize(450, 550);
+        setSize(500, 600);
+        setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(245, 245, 245));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 20, 10, 20);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
+        JPanel fondo = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(
+                        0, 0, new Color(45, 55, 75),
+                        0, getHeight(), new Color(15, 20, 35)
+                );
+                g2.setPaint(gp);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        fondo.setLayout(null);
+        add(fondo);
 
-        JLabel lblTitulo = new JLabel("Formulario de Registro", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 20));
-        lblTitulo.setForeground(new Color(60, 60, 60));
-        panel.add(lblTitulo, gbc);
+        JPanel panel = new JPanel(null);
+        panel.setBounds(100, 60, 300, 460);
+        panel.setBackground(new Color(0,0,0));
+        panel.setBorder(new LineBorder(new Color(255, 255, 255, 80), 2, true));
+        fondo.add(panel);
 
-        JTextField txtNombre = new JTextField();
-        JTextField txtCorreo = new JTextField();
-        JTextField txtUsuario = new JTextField();
-        JPasswordField txtPassword = new JPasswordField();
-        JTextField txtTelefono = new JTextField();
-        JButton btnRegistrar = new JButton("Registrar");
+        JLabel lblTitulo = new JLabel("Registro", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        lblTitulo.setForeground(Color.WHITE);
+        lblTitulo.setBounds(0, 20, 300, 40);
+        panel.add(lblTitulo);
 
-        gbc.gridy = 1; addCampo(panel, gbc, "Nombre completo:", txtNombre);
-        gbc.gridy = 2; addCampo(panel, gbc, "Correo:", txtCorreo);
-        gbc.gridy = 3; addCampo(panel, gbc, "Usuario:", txtUsuario);
-        gbc.gridy = 4; addCampo(panel, gbc, "Contraseña:", txtPassword);
-        gbc.gridy = 5; addCampo(panel, gbc, "Teléfono:", txtTelefono);
+        JTextField txtNombre = crearCampoTexto("Nombre completo");
+        txtNombre.setBounds(40, 80, 220, 40);
+        panel.add(txtNombre);
 
-        gbc.gridy = 6;
-        btnRegistrar.setBackground(new Color(33, 150, 243));
-        btnRegistrar.setForeground(Color.WHITE);
+        JTextField txtCorreo = crearCampoTexto("Correo");
+        txtCorreo.setBounds(40, 140, 220, 40);
+        panel.add(txtCorreo);
+
+        JTextField txtUsuario = crearCampoTexto("Usuario");
+        txtUsuario.setBounds(40, 200, 220, 40);
+        panel.add(txtUsuario);
+
+        JPasswordField txtPassword = crearCampoPassword("Contraseña");
+        txtPassword.setBounds(40, 260, 220, 40);
+        panel.add(txtPassword);
+
+        JTextField txtTelefono = crearCampoTexto("Teléfono");
+        txtTelefono.setBounds(40, 320, 220, 40);
+        panel.add(txtTelefono);
+
+        JButton btnRegistrar = new JButton("Crear cuenta");
+        btnRegistrar.setBounds(40, 390, 220, 40);
         btnRegistrar.setFocusPainted(false);
-        btnRegistrar.setFont(new Font("Arial", Font.BOLD, 14));
-        panel.add(btnRegistrar, gbc);
+        btnRegistrar.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnRegistrar.setForeground(Color.WHITE);
+        btnRegistrar.setBackground(new Color(70, 130, 250));
+        btnRegistrar.setBorder(new LineBorder(new Color(90,140,255), 2, true));
+        btnRegistrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        add(panel);
+        btnRegistrar.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                btnRegistrar.setBackground(new Color(90,150,255));
+            }
+            public void mouseExited(MouseEvent e) {
+                btnRegistrar.setBackground(new Color(70,130,250));
+            }
+        });
+
+        panel.add(btnRegistrar);
 
         btnRegistrar.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             String correo = txtCorreo.getText().trim();
             String usuario = txtUsuario.getText().trim();
-            String contrasena = new String(txtPassword.getPassword());
+            String contrasena = String.valueOf(txtPassword.getPassword());
             String telefono = txtTelefono.getText().trim();
 
-            if (nombre.isEmpty() || correo.isEmpty() || usuario.isEmpty() || contrasena.isEmpty() || telefono.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Por favor completa todos los campos");
+            if (nombre.isEmpty() || correo.isEmpty() || usuario.isEmpty() ||
+                contrasena.isEmpty() || telefono.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Completa todos los campos.");
                 return;
             }
 
             if (!correo.contains("@")) {
-                JOptionPane.showMessageDialog(this, "Por favor ingresa un correo válido.");
+                JOptionPane.showMessageDialog(this, "Correo inválido.");
                 return;
             }
 
-            Usuario nuevoUsuario = new Usuario(nombre, correo, usuario, contrasena, telefono);
+            Usuario nuevo = new Usuario(nombre, correo, usuario, contrasena, telefono);
 
             if (ServicioUsuario.login(usuario, contrasena) != null) {
                 JOptionPane.showMessageDialog(this, "El usuario ya existe.");
-            } else {
-                ServicioUsuario.registrarUsuario(nuevoUsuario);
-                JOptionPane.showMessageDialog(this, "Registro exitoso. Ahora puedes iniciar sesión.");
-                dispose(); 
+                return;
             }
+
+            ServicioUsuario.registrarUsuario(nuevo);
+            JOptionPane.showMessageDialog(this, "Registro exitoso. Ahora puedes iniciar sesión.");
+            dispose();
         });
     }
 
-    private void addCampo(JPanel panel, GridBagConstraints gbc, String label, JComponent campo) {
-        JPanel contenedor = new JPanel(new BorderLayout(5, 5));
-        contenedor.setOpaque(false);
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Arial", Font.PLAIN, 14));
-        campo.setPreferredSize(new Dimension(200, 30));
-        campo.setFont(new Font("Arial", Font.PLAIN, 14));
-        contenedor.add(lbl, BorderLayout.NORTH);
-        contenedor.add(campo, BorderLayout.CENTER);
-        panel.add(contenedor, gbc);
+    private JTextField crearCampoTexto(String placeholder) {
+        JTextField campo = new JTextField(placeholder);
+        campo.setForeground(Color.GRAY);
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        campo.setOpaque(false);
+        campo.setBorder(new MatteBorder(0, 0, 2, 0, new Color(200,200,200)));
+        campo.setCaretColor(Color.WHITE);
+
+        campo.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                if (campo.getText().equals(placeholder)) {
+                    campo.setText("");
+                    campo.setForeground(Color.WHITE);
+                }
+            }
+            public void focusLost(FocusEvent e) {
+                if (campo.getText().isEmpty()) {
+                    campo.setText(placeholder);
+                    campo.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        return campo;
+    }
+
+    private JPasswordField crearCampoPassword(String placeholder) {
+        JPasswordField campo = new JPasswordField(placeholder);
+        campo.setForeground(Color.GRAY);
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        campo.setOpaque(false);
+        campo.setBorder(new MatteBorder(0, 0, 2, 0, new Color(200,200,200)));
+        campo.setEchoChar((char) 0);
+        campo.setCaretColor(Color.WHITE);
+
+        campo.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                if (new String(campo.getPassword()).equals(placeholder)) {
+                    campo.setText("");
+                    campo.setEchoChar('•');
+                    campo.setForeground(Color.WHITE);
+                }
+            }
+            public void focusLost(FocusEvent e) {
+                if (campo.getPassword().length == 0) {
+                    campo.setText(placeholder);
+                    campo.setEchoChar((char) 0);
+                    campo.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        return campo;
     }
 }

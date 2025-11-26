@@ -1,1 +1,1 @@
-[{"idLibro":"0486678f-83fa-4920-b616-363fb5ad912a","idCliente":"lala120-vega","fechaPrestamo":"2025-11-26","devuelto":false,"fechaLimite":"2025-12-03","idPrestamo":"9d430517-312e-4124-ac76-5da28b542b28"}]
+[{"fechaDevolucionReal":"2025-11-26","idLibro":"db8bb894-4c60-4393-9be2-3db05e0bdd2b","idCliente":"COminola1011094665","fechaPrestamo":"2025-11-26","devuelto":true,"fechaLimite":"2025-12-03","idPrestamo":"4a17de8a-529d-435c-a642-d18675a6ee4a"}]
