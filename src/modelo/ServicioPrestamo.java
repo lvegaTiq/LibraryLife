@@ -9,53 +9,75 @@ import java.util.UUID;
 
 public class ServicioPrestamo {
 
-    private List<Prestamo> prestamosActivos = new ArrayList<>();
+    private static final String ARCHIVO = "prestamos.json";
 
-    public void agregarPrestamo(String idLibro, String idCliente, LocalDate fechaPrestamo) {
-
-        String idPrestamo = UUID.randomUUID().toString();
-
-        Prestamo prestamo = new Prestamo(idPrestamo, idLibro, idCliente, fechaPrestamo);
-        prestamosActivos.add(prestamo);
+    // -------------------------------
+    // 1. REGISTRAR PRÉSTAMO
+    // -------------------------------
+    public static void registrarPrestamo(String idLibro, String idCliente) {
 
         JSONObject prestamoJson = new JSONObject();
-        prestamoJson.put("idPrestamo", prestamo.getIdPrestamo());
-        prestamoJson.put("idLibro", prestamo.getIdLibro());
-        prestamoJson.put("idCliente", prestamo.getIdCliente());
-        prestamoJson.put("fechaPrestamo", prestamo.getFechaPrestamo().toString());
-        prestamoJson.put("fechaDevolucion", prestamo.getFechaDevolucion().toString());
+        prestamoJson.put("idPrestamo", UUID.randomUUID().toString());
+        prestamoJson.put("idLibro", idLibro);
+        prestamoJson.put("idCliente", idCliente);
+        prestamoJson.put("fechaPrestamo", LocalDate.now().toString());
+        prestamoJson.put("fechaLimite", LocalDate.now().plusDays(7).toString());
+        prestamoJson.put("devuelto", false);
 
-        JSONArray prestamos = JsonDB.leer("prestamos.json");
+        JSONArray prestamos = JsonDB.leer(ARCHIVO);
         prestamos.add(prestamoJson);
-        JsonDB.escribir("prestamos.json", prestamos);
+        JsonDB.escribir(ARCHIVO, prestamos);
 
-        System.out.println("Préstamo agregado: " + prestamo);
+        System.out.println("✔ Préstamo registrado correctamente");
     }
 
-    public List<Prestamo> obtenerPrestamosActivos() {
-        return prestamosActivos;
-    }
+    // -------------------------------------
+    // 2. OBTENER PRÉSTAMOS POR USUARIO
+    // -------------------------------------
+    public static List<Prestamo> obtenerPrestamosPorUsuario(String usuario) {
 
-    public Prestamo buscarPrestamoPorId(String idPrestamo) {
-        for (Prestamo prestamo : prestamosActivos) {
-            if (prestamo.getIdPrestamo().equals(idPrestamo)) {
-                return prestamo;
+        List<Prestamo> lista = new ArrayList<>();
+        JSONArray prestamos = JsonDB.leer(ARCHIVO);
+
+        for (Object obj : prestamos) {
+            JSONObject json = (JSONObject) obj;
+
+            String idCliente = (String) json.get("idCliente");
+
+            if (idCliente.equals(usuario)) {
+                Prestamo p = new Prestamo(
+                        (String) json.get("idPrestamo"),
+                        (String) json.get("idLibro"),
+                        idCliente,
+                        LocalDate.parse((String) json.get("fechaPrestamo"))
+                );
+                // agregar fecha límite
+                p.setFechaDevolucion(LocalDate.parse((String) json.get("fechaLimite")));
+
+                lista.add(p);
             }
         }
-        return null;
+
+        return lista;
     }
 
-    public void cargarPrestamosDesdeJson() {
-        JSONArray prestamosJson = JsonDB.leer("prestamos.json");
-        for (Object obj : prestamosJson) {
-            JSONObject jsonPrestamo = (JSONObject) obj;
-            Prestamo prestamo = new Prestamo(
-                (String) jsonPrestamo.get("idPrestamo"),
-                (String) jsonPrestamo.get("idLibro"),
-                (String) jsonPrestamo.get("idCliente"),
-                LocalDate.parse((String) jsonPrestamo.get("fechaPrestamo"))
-            );
-            prestamosActivos.add(prestamo);
+    // -------------------------------------
+    // 3. MARCAR DEVUELTO
+    // -------------------------------------
+    public static void marcarComoDevuelto(String idLibro) {
+
+        JSONArray array = JsonDB.leer(ARCHIVO);
+
+        for (Object obj : array) {
+            JSONObject json = (JSONObject) obj;
+
+            if (json.get("idLibro").equals(idLibro)) {
+                json.put("devuelto", true);
+                json.put("fechaDevolucionReal", LocalDate.now().toString());
+                break;
+            }
         }
+
+        JsonDB.escribir(ARCHIVO, array);
     }
 }

@@ -107,60 +107,34 @@ public class ServicioLibro {
         return disponibles;
     }
     
-
-    public static boolean prestarLibro(String idLibro, String usuario) {
+    public static Libro obtenerLibroPorId(String idBuscado) {
         try {
             JSONParser parser = new JSONParser();
-            JSONArray libros = (JSONArray) parser.parse(new FileReader("Libros.json"));
-        
-            JSONObject libroEncontrado = null;
-        
-            for (Object obj : libros) {
-                JSONObject libro = (JSONObject) obj;
-            
-                String id = (String) libro.get("id");
-            
-                if (id.equals(idLibro)) {
-                    libroEncontrado = libro;
-                    break;
+            FileReader reader = new FileReader(ARCHIVO);
+            JSONArray jsonArray = (JSONArray) parser.parse(reader);
+
+            for (Object obj : jsonArray) {
+                JSONObject jsonLibro = (JSONObject) obj;
+
+                String id = (String) jsonLibro.get("id");
+
+                if (id.equals(idBuscado)) {
+
+                    String titulo = (String) jsonLibro.get("titulo");
+                    String autor = (String) jsonLibro.get("autor");
+                    String categoria = (String) jsonLibro.get("categoria");
+                    boolean disponible = (boolean) jsonLibro.get("disponible");
+
+                    return new Libro(id, titulo, autor, categoria, disponible);
                 }
             }
-        
-            if (libroEncontrado == null) {
-                System.out.println("Libro no encontrado");
-                return false;
-            }
-        
-            boolean disponible = (boolean) libroEncontrado.get("disponible");
-        
-            if (!disponible) {
-                System.out.println("Libro NO disponible");
-                return false;
-            }
-        
-            libroEncontrado.put("disponible", false);
-        
-            try (FileWriter writer = new FileWriter("Libros.json")) {
-                writer.write(libros.toJSONString());
-                writer.flush();
-            }
-        
-            ServicioPrestamo sp = new ServicioPrestamo();
-            sp.agregarPrestamo(
-                idLibro,
-                usuario,
-                java.time.LocalDate.now()
-            );
-        
-            System.out.println("Préstamo registrado correctamente.");
-            return true;
-        
-        } catch (Exception e) {
-            System.out.println("ERROR en prestarLibro: " + e.getMessage());
-            return false;
-        }
-    }
 
+        } catch (Exception e) {
+            System.out.println("Error al obtener libro por ID: " + e.getMessage());
+        }
+
+        return null;
+    }
 
 
 }

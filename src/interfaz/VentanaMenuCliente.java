@@ -1,167 +1,254 @@
-// VentanaMenuCliente.java
 package interfaz;
 
 import modelo.Libro;
+import modelo.Prestamo;
 import modelo.ServicioLibro;
+import modelo.ServicioPrestamo;
 import modelo.Usuario;
 
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class VentanaMenuCliente extends JFrame {
-    private Usuario usuario;
+
+    public Usuario usuario;
 
     public VentanaMenuCliente(Usuario usuarioLogeado) {
-        try {
-            this.usuario = usuarioLogeado;
+        this.usuario = usuarioLogeado;
 
-            setTitle("Menú Cliente");
-            setSize(700, 500);
-            setLocationRelativeTo(null);
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Menú Cliente");
+        setSize(700, 500);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            JTabbedPane pestañas = new JTabbedPane();
+        JTabbedPane pestañas = new JTabbedPane();
 
-            // Pestaña Librosprestar
-            JButton btnPrestarLibro = new JButton("Prestar Libro");
-            btnPrestarLibro.addActionListener(e -> mostrarLibrosDisponibles());
+        // Panel Libros
+        JPanel panelLibros = new JPanel();
 
-            JPanel panelLibros = new JPanel();
-            panelLibros.add(btnPrestarLibro);
+        JButton btnPrestar = new JButton("Prestar Libro");
+        btnPrestar.addActionListener(e -> mostrarLibrosDisponibles());
+        panelLibros.add(btnPrestar);
 
-            pestañas.addTab("📚 Libros", panelLibros);
+        JButton btnDevolver = new JButton("Devolver Libro");
+        btnDevolver.addActionListener(e -> mostrarLibrosPrestados());
+        panelLibros.add(btnDevolver);
 
-            JPanel panelPerfil = new JPanel(new GridLayout(6, 1, 10, 10));
-            panelPerfil.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
-            panelPerfil.add(new JLabel("Nombre: " + usuario.getNombreCompleto()));
-            panelPerfil.add(new JLabel("Correo: " + usuario.getCorreo()));
-            panelPerfil.add(new JLabel("Usuario: " + usuario.getUsuario()));
-            panelPerfil.add(new JLabel("Teléfono: " + usuario.getTelefono()));
-            panelPerfil.add(new JLabel("Rol: " + usuario.getRol()));
+        pestañas.addTab("📚 Libros", panelLibros);
 
-            pestañas.addTab("👤 Mi perfil", panelPerfil);
+        // Panel perfil
+        JPanel panelPerfil = new JPanel(new GridLayout(6, 1, 10, 10));
+        panelPerfil.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        panelPerfil.add(new JLabel("Nombre: " + usuario.getNombreCompleto()));
+        panelPerfil.add(new JLabel("Correo: " + usuario.getCorreo()));
+        panelPerfil.add(new JLabel("Usuario: " + usuario.getUsuario()));
+        panelPerfil.add(new JLabel("Teléfono: " + usuario.getTelefono()));
+        panelPerfil.add(new JLabel("Rol: " + usuario.getRol()));
+        pestañas.addTab("👤 Mi perfil", panelPerfil);
 
-            JButton btnCerrarSesion = new JButton("Cerrar sesión");
-            btnCerrarSesion.addActionListener(e -> cerrarSesion());
-            pestañas.addTab("Cerrar sesión", btnCerrarSesion);
+        // Cerrar sesión
+        JButton btnCerrarSesion = new JButton("Cerrar sesión");
+        btnCerrarSesion.addActionListener(e -> {
+            dispose();
+            new VentanaInicio().setVisible(true);
+        });
+        pestañas.addTab("Cerrar sesión", btnCerrarSesion);
 
-            add(pestañas);
-            setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error al cargar el menú cliente: " + e.getMessage());
-        }
+        add(pestañas);
+        setVisible(true);
     }
 
-    private void cerrarSesion() {
-        dispose();
-        new VentanaInicio().setVisible(true);
-    }
+    // ==========================================================
+    // MOSTRAR LIBROS DISPONIBLES PARA PRESTAR
+    // ==========================================================
     private void mostrarLibrosDisponibles() {
-        
+
         JDialog ventana = new JDialog(this, "Libros Disponibles", true);
         ventana.setSize(750, 400);
         ventana.setLocationRelativeTo(this);
-        
+
         DefaultTableModel modelo = new DefaultTableModel(
                 new Object[]{"ID", "Titulo", "Autor", "Estado", "Acción"}, 0
         );
-    
+
         JTable tabla = new JTable(modelo);
         ventana.add(new JScrollPane(tabla));
-    
-        // ✔ AQUÍ EL CAMBIO IMPORTANTE
-        List<Libro> libros = ServicioLibro.obtenerTodos();  // NO obtenerLibrosDisponibles()
-    
-        // Filtrar disponibles
-        libros = libros.stream()
+
+        // Cargar todos los libros disponibles
+        List<Libro> libros = ServicioLibro.obtenerTodos()
+                .stream()
                 .filter(Libro::isDisponible)
                 .collect(Collectors.toList());
-    
+
         for (Libro libro : libros) {
             modelo.addRow(new Object[]{
                     libro.getId(),
                     libro.getTitulo(),
                     libro.getAutor(),
-                    libro.isDisponible() ? "Disponible" : "No disponible",
+                    "Disponible",
                     "Prestar"
             });
         }
-    
-        tabla.getColumn("Acción").setCellRenderer(new ButtonRenderer());
-        tabla.getColumn("Acción").setCellEditor(new ButtonEditor(new JCheckBox()));
-    
+
+        tabla.getColumn("Acción").setCellRenderer(new ButtonRendererPrestar());
+        tabla.getColumn("Acción").setCellEditor(new ButtonEditorPrestar(new JCheckBox(), this));
+
         ventana.setVisible(true);
     }
 
+    // ==========================================================
+    // MOSTRAR LIBROS PRESTADOS PARA DEVOLVER
+    // ==========================================================
+    private void mostrarLibrosPrestados() {
+
+        JDialog ventana = new JDialog(this, "Mis Libros Prestados", true);
+        ventana.setSize(800, 400);
+        ventana.setLocationRelativeTo(this);
+
+        DefaultTableModel modelo = new DefaultTableModel(
+                new Object[]{"ID", "Título", "Autor", "Fecha Préstamo", "Fecha Límite", "Acción"}, 0
+        );
+
+        JTable tabla = new JTable(modelo);
+        ventana.add(new JScrollPane(tabla));
+
+        List<Prestamo> lista = ServicioPrestamo.obtenerPrestamosPorUsuario(usuario.getUsuario());
+
+        for (Prestamo p : lista) {
+
+            Libro libro = ServicioLibro.obtenerLibroPorId(p.getIdLibro());
+
+            modelo.addRow(new Object[]{
+                    libro.getId(),
+                    libro.getTitulo(),
+                    libro.getAutor(),
+                    p.getFechaPrestamo(),
+                    p.getFechaDevolucion(), // FECHA LÍMITE
+                    "Devolver"
+            });
+        }
+
+        tabla.getColumn("Acción").setCellRenderer(new ButtonRendererDevolver());
+        tabla.getColumn("Acción").setCellEditor(new ButtonEditorDevolver(new JCheckBox(), this));
+
+        ventana.setVisible(true);
+    }
 }
 
-class ButtonRenderer extends JButton implements TableCellRenderer {
 
-    public ButtonRenderer() {
-        setOpaque(true);
-    }
-
+// ============================================================================
+// RENDERER / EDITOR PRESTAR
+// ============================================================================
+class ButtonRendererPrestar extends JButton implements TableCellRenderer {
+    public ButtonRendererPrestar() { setOpaque(true); }
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus,
-                                                   int row, int col) {
-        String estado = table.getValueAt(row, 3).toString();
-
-        setText(estado.equals("Disponible") ? "Prestar" : "No disponible");
-        setEnabled(estado.equals("Disponible"));
-
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean selected,
+                                                   boolean focus, int row, int col) {
+        setText("Prestar");
         return this;
     }
 }
-class ButtonEditor extends DefaultCellEditor {
+
+class ButtonEditorPrestar extends DefaultCellEditor {
 
     private JButton button;
     private String idLibro;
     private String titulo;
     private boolean clicked;
+    private VentanaMenuCliente ventana;
 
-    public ButtonEditor(JCheckBox checkBox) {
+    public ButtonEditorPrestar(JCheckBox checkBox, VentanaMenuCliente ventana) {
         super(checkBox);
-
+        this.ventana = ventana;
         button = new JButton();
         button.setOpaque(true);
-
         button.addActionListener(e -> fireEditingStopped());
     }
 
-    @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int col) {
+            boolean selected, int row, int col) {
 
         idLibro = table.getValueAt(row, 0).toString();
-        titulo = table.getValueAt(row, 1).toString();
-
-        String estado = table.getValueAt(row, 3).toString();
-        button.setText(estado.equals("Disponible") ? "Prestar" : "No disponible");
-        button.setEnabled(estado.equals("Disponible"));
+        titulo  = table.getValueAt(row, 1).toString();
 
         clicked = true;
         return button;
     }
 
-    @Override
     public Object getCellEditorValue() {
-        if (clicked) {
-            registrarPrestamo();
-        }
+        if (clicked) registrarPrestamo();
         clicked = false;
         return "Prestar";
     }
 
     private void registrarPrestamo() {
 
+        ServicioPrestamo.registrarPrestamo(idLibro, ventana.usuario.getUsuario());
+
         ServicioLibro.actualizarDisponibilidad(idLibro, false);
 
         JOptionPane.showMessageDialog(button,
-                "El libro '" + titulo + "' se ha prestado correctamente.");
+                "📚 El libro '" + titulo + "' ha sido prestado correctamente.");
+
+        SwingUtilities.getWindowAncestor(button).dispose();
+    }
+}
+
+
+class ButtonRendererDevolver extends JButton implements TableCellRenderer {
+    public ButtonRendererDevolver() { setOpaque(true); }
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean selected,
+                                                   boolean focus, int row, int col) {
+        setText("Devolver");
+        return this;
+    }
+}
+
+class ButtonEditorDevolver extends DefaultCellEditor {
+
+    private JButton button;
+    private String idLibro;
+    private VentanaMenuCliente ventana;
+    private boolean clicked;
+
+    public ButtonEditorDevolver(JCheckBox box, VentanaMenuCliente ventana) {
+        super(box);
+        this.ventana = ventana;
+        button = new JButton();
+        button.addActionListener(e -> fireEditingStopped());
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value,
+                                                 boolean selected, int row, int col) {
+
+        idLibro = table.getValueAt(row, 0).toString();
+        clicked = true;
+        return button;
+    }
+
+    @Override
+    public Object getCellEditorValue() {
+
+        if (clicked) devolverLibro();
+
+        clicked = false;
+        return "Devolver";
+    }
+
+    private void devolverLibro() {
+
+        ServicioPrestamo.marcarComoDevuelto(idLibro);
+
+        ServicioLibro.actualizarDisponibilidad(idLibro, true);
+
+        JOptionPane.showMessageDialog(button, "📖 Libro devuelto correctamente.");
+
+        SwingUtilities.getWindowAncestor(button).dispose();
     }
 }

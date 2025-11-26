@@ -2,6 +2,7 @@ package interfaz;
 
 import modelo.Libro;
 import modelo.ServicioLibro;
+import modelo.ServicioPrestamo;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -91,24 +92,20 @@ public class VentanaRegistrarPrestamo extends JFrame {
                 return;
             }
 
-            boolean exito = ServicioLibro.prestarLibro(idLibro, usuario);
+            // 1️⃣ Registrar préstamo en JSON
+            ServicioPrestamo.registrarPrestamo(idLibro, usuario);
 
-            if (exito) {
-                JOptionPane.showMessageDialog(this,
-                        "¡Préstamo registrado correctamente!",
-                        "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE);
+            // 2️⃣ Cambiar disponibilidad del libro
+            ServicioLibro.actualizarDisponibilidad(idLibro, false);
 
-                // Actualizamos la tabla
-                modeloTabla.setRowCount(0);
-                cargarLibros();
+            JOptionPane.showMessageDialog(this,
+                    "¡Préstamo registrado correctamente!",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
 
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "ERROR: No se pudo registrar el préstamo.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+            // Actualizamos la tabla
+            modeloTabla.setRowCount(0);
+            cargarLibros();
         });
 
         setVisible(true);
