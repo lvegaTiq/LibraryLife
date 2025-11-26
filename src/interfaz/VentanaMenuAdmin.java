@@ -24,12 +24,14 @@ public class VentanaMenuAdmin extends JFrame {
         panelBotones.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
         JButton btnVerUsuarios = new JButton("📋 Consultar Usuarios");
+        JButton btnCrearUser = new JButton("➕ Crear usuario");
         JButton btnVerLibros = new JButton("📚 Consultar Libros");
         JButton btnRegistrarLibro = new JButton("➕ Registrar Libro");
         JButton btnLibrosPrestados = new JButton("📚 Libro Prestado");
         JButton btnCerrarSesion = new JButton("Cerrar Sesión");
 
         panelBotones.add(btnVerUsuarios);
+        panelBotones.add(btnCrearUser);
         panelBotones.add(btnVerLibros);
         panelBotones.add(btnRegistrarLibro);
         panelBotones.add(btnLibrosPrestados);
@@ -38,6 +40,7 @@ public class VentanaMenuAdmin extends JFrame {
         add(panelBotones, BorderLayout.CENTER);
 
         btnVerUsuarios.addActionListener(e -> new VentanaConsultaInteractiva("Usuarios", usuarioLogeado).setVisible(true));
+        btnCrearUser.addActionListener(e -> new VentanaRegistrarUsuario().setVisible(true));
         btnVerLibros.addActionListener(e -> new VentanaConsultaInteractiva("Libros", usuarioLogeado).setVisible(true));
         btnRegistrarLibro.addActionListener(e -> new VentanaRegistroLibro().setVisible(true));
         btnLibrosPrestados.addActionListener(e -> new VentanaPrestamoLibrosAdmin().setVisible(true));
