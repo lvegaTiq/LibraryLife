@@ -15,13 +15,12 @@ public class Prestamo {
         this.idLibro = idLibro;
         this.idCliente = idCliente;
         this.fechaPrestamo = fechaPrestamo;
-        this.devuelto = false; // El préstamo no ha sido devuelto inicialmente
+        this.devuelto = false;
     }
 
-    // Método para registrar la devolución
     public void registrarDevolucion() {
-        this.devuelto = true; // Marca el préstamo como devuelto
-        this.fechaDevolucion = LocalDate.now(); // La fecha de devolución es la fecha actual
+        this.devuelto = true; 
+        this.fechaDevolucion = LocalDate.now(); 
     }
 
     // Getters y Setters
