@@ -49,27 +49,32 @@ public class VentanaConsultaInteractiva extends JFrame {
         areaArbol = new JTextArea(10, 40);
         areaArbol.setEditable(false);
         JScrollPane scrollArbol = new JScrollPane(areaArbol);
-        add(scrollArbol, BorderLayout.EAST); // Agregar el panel al lado derecho
+        add(scrollArbol, BorderLayout.EAST);
 
-        // Crear instancia del árbol
+        // SOLO construir árbol si estamos consultando usuarios
+    if (tipoArchivo.equals("usuarios.json")) {
+
         ArbolUser arbolUser = new ArbolUser();
 
-        // Insertar usuarios desde el JSON en el árbol
         for (Object obj : datosJSON) {
             JSONObject item = (JSONObject) obj;
+
             String nombre = (String) item.get("nombreCompleto");
             String email = (String) item.get("correo");
             String usuarioNombre = (String) item.get("usuario");
             String telefono = (String) item.get("telefono");
-            String contrasena = ""; // Asigna si lo tienes en el JSON
+            String contrasena = "";
 
             Usuario usuario = new Usuario(nombre, email, usuarioNombre, telefono, contrasena);
             arbolUser.insertar(usuario);
         }
 
-        // Mostrar el árbol en orden en el área
-        areaArbol.setText(""); // Limpiar antes
-        arbolUser.inOrden(areaArbol); // Mostrar árbol en orden
+        areaArbol.setText("");
+        arbolUser.inOrden(areaArbol);
+    } else {
+        areaArbol.setText("Vista de árbol solo disponible para usuarios.");
+    }
+
 
         btnActualizar.addActionListener(e -> actualizarSeleccionado());
         btnInactivar.addActionListener(e -> inactivarSeleccionado());

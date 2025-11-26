@@ -10,10 +10,8 @@ public class ServicioUsuario {
     public static void registrarUsuario(Usuario usuario) {
         JSONArray usuarios = JsonDB.leer("usuarios.json");
 
-        // Generar un ID único para el usuario
-        String id = UUID.randomUUID().toString();  // Usando UUID para generar un ID único
+        String id = UUID.randomUUID().toString();  
 
-        // Crear un nuevo objeto JSON con los datos del usuario
         JSONObject nuevo = new JSONObject();
         nuevo.put("id", id);
         nuevo.put("nombreCompleto", usuario.getNombreCompleto());
@@ -23,7 +21,6 @@ public class ServicioUsuario {
         nuevo.put("telefono", usuario.getTelefono());
         nuevo.put("rol", usuario.getRol());
 
-        // Añadir el nuevo usuario al archivo JSON
         usuarios.add(nuevo);
         JsonDB.escribir("usuarios.json", usuarios);
     }
@@ -36,7 +33,7 @@ public class ServicioUsuario {
             JSONObject jsonUser = (JSONObject) obj;
             if (jsonUser.get("usuario").equals(usuario) && jsonUser.get("contrasena").equals(contrasena)) {
                 return new Usuario(
-                    (String) jsonUser.get("id"), // Obtener el ID del usuario desde el JSON
+                    (String) jsonUser.get("id"), 
                     (String) jsonUser.get("nombreCompleto"),
                     (String) jsonUser.get("correo"),
                     (String) jsonUser.get("usuario"),
@@ -46,6 +43,6 @@ public class ServicioUsuario {
             }
         }
 
-        return null; // Si no se encuentra el usuario
+        return null;
     }
 }

@@ -10,10 +10,10 @@ public class ServicioDevolucion {
     // Método para registrar una devolución
     public void registrarDevolucion(Prestamo prestamo) {
         if (prestamo != null) {
-            // Crear una nueva devolución solo si el préstamo tiene una fecha de devolución asignada
+           
             if (prestamo.getFechaDevolucion() != null) {
-                // Crear una nueva devolución
-                String idDevolucion = UUID.randomUUID().toString();  // Generar un ID único para la devolución
+                
+                String idDevolucion = UUID.randomUUID().toString();  
                 Devolucion devolucion = new Devolucion(
                     idDevolucion,
                     prestamo.getIdPrestamo(),
@@ -23,7 +23,7 @@ public class ServicioDevolucion {
                     prestamo.getFechaDevolucion()
                 );
 
-                // Guardar la devolución en el archivo JSON
+               
                 JSONArray devoluciones = JsonDB.leer("devoluciones.json");
                 JSONObject devolucionJson = new JSONObject();
                 devolucionJson.put("idDevolucion", devolucion.getIdDevolucion());
@@ -36,7 +36,6 @@ public class ServicioDevolucion {
                 devoluciones.add(devolucionJson);
                 JsonDB.escribir("devoluciones.json", devoluciones);
 
-                // Marcar el préstamo como devuelto
                 prestamo.registrarDevolucion();
                 System.out.println("Devolución registrada: " + devolucion);
             } else {

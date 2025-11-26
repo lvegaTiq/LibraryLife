@@ -1,5 +1,4 @@
 package interfaz;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -39,55 +38,51 @@ public class VentanaRegistroLibro extends JFrame {
             String autor = txtAutor.getText();
             String categoria = txtCategoria.getText();
             String anio = txtAnio.getText();
-
+                
             if (titulo.isEmpty() || autor.isEmpty() || categoria.isEmpty() || anio.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.");
                 return;
             }
-
-            // Crear objeto Libro con ID generado automáticamente
+        
             Libro libro = new Libro(titulo, autor, categoria, true);
             
-            // Guardar el libro en el archivo JSON
-            agregarLibro(libro, anio);
-
+            agregarLibro(libro);
+        
+            JOptionPane.showMessageDialog(this, "Libro registrado correctamente");
+            dispose();
         });
+
     }
 
-    // Método para guardar el libro en el archivo JSON
-    private void agregarLibro(Libro libro, String anio) {
-        // Ahora, guardamos el libro en el archivo JSON
-        JSONObject libroJSON = new JSONObject();
-        libroJSON.put("id", libro.getId());  // Añadir el ID
-        libroJSON.put("titulo", libro.getTitulo());
-        libroJSON.put("autor", libro.getAutor());
-        libroJSON.put("categoria", libro.getCategoria());
-        libroJSON.put("anio", anio);
-        libroJSON.put("disponible", true);
-
+    public static void agregarLibro(Libro libro) {
         try {
-            Path path = Paths.get("libros.json");
-            JSONArray libros = new JSONArray();
+            JSONParser parser = new JSONParser();
+            JSONArray array;
 
-            // Verificar si el archivo JSON ya existe
-            if (Files.exists(path)) {
-                // Leer el contenido existente del archivo
-                String contenido = Files.readString(path);
-                JSONParser parser = new JSONParser();
-                libros = (JSONArray) parser.parse(contenido);
+            try {
+                FileReader reader = new FileReader("Libros.json");
+                array = (JSONArray) parser.parse(reader);
+            } catch (Exception e) {
+                array = new JSONArray();
             }
 
-            // Agregar el nuevo libro al JSON
-            libros.add(libroJSON);
+            JSONObject nuevo = new JSONObject();
+            nuevo.put("id", libro.getId());
+            nuevo.put("titulo", libro.getTitulo());
+            nuevo.put("autor", libro.getAutor());
+            nuevo.put("categoria", libro.getCategoria());
+            nuevo.put("disponible", libro.isDisponible());
 
-            // Escribir el contenido actualizado en el archivo
-            Files.writeString(path, libros.toJSONString());
+            array.add(nuevo);
 
-            JOptionPane.showMessageDialog(this, "Libro registrado exitosamente.");
-            dispose(); // Cerrar la ventana después de guardar
+            try (FileWriter writer = new FileWriter("Libros.json")) {
+                writer.write(array.toJSONString());
+                writer.flush();
+            }
 
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al guardar el libro: " + ex.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error al agregar libro: " + e.getMessage());
         }
     }
+
 }

@@ -1,34 +1,134 @@
 package interfaz;
 
+import modelo.Libro;
 import modelo.ServicioLibro;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class VentanaRegistrarPrestamo extends JFrame {
-    private int libroId;
 
-    public VentanaRegistrarPrestamo(int libroId) {
-        this.libroId = libroId;
+    private JTable tablaLibros;
+    private DefaultTableModel modeloTabla;
+
+    public VentanaRegistrarPrestamo() {
 
         setTitle("Registrar Préstamo");
-        setSize(400, 200);
+        setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        // Mostrar detalles del libro que se seleccionó
-        JLabel labelLibro = new JLabel("Se ha seleccionado el libro con ID: " + libroId);
-        labelLibro.setFont(new Font("Arial", Font.PLAIN, 16));
+        // ------------------------
+        //    TABLA DE LIBROS
+        // ------------------------
+        String[] columnas = {"ID", "Título", "Autor", "Categoría", "Disponible"};
+        modeloTabla = new DefaultTableModel(columnas, 0);
+        tablaLibros = new JTable(modeloTabla);
 
-        JPanel panel = new JPanel();
-        panel.add(labelLibro);
+        cargarLibros();
 
-        add(panel);
+        JScrollPane scroll = new JScrollPane(tablaLibros);
+        add(scroll, BorderLayout.CENTER);
+
+        // ------------------------
+        //  PANEL INFERIOR (Usuario + Botón)
+        // ------------------------
+        JPanel panelInferior = new JPanel();
+        panelInferior.setLayout(new GridLayout(2, 2, 10, 10));
+        panelInferior.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel labelUsuario = new JLabel("Usuario que toma el préstamo:");
+        JTextField campoUsuario = new JTextField();
+
+        JButton btnRegistrar = new JButton("Registrar Préstamo");
+
+        panelInferior.add(labelUsuario);
+        panelInferior.add(campoUsuario);
+
+        // espacio vacío estético
+        panelInferior.add(new JLabel(""));
+        panelInferior.add(btnRegistrar);
+
+        add(panelInferior, BorderLayout.SOUTH);
+
+
+        // ------------------------
+        //  ACCIÓN DEL BOTÓN
+        // ------------------------
+        btnRegistrar.addActionListener(e -> {
+
+            int fila = tablaLibros.getSelectedRow();
+
+            if (fila == -1) {
+                JOptionPane.showMessageDialog(this,
+                        "Debe seleccionar un libro de la tabla.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String usuario = campoUsuario.getText().trim();
+            if (usuario.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Debe ingresar el nombre del usuario.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String idLibro = tablaLibros.getValueAt(fila, 0).toString();
+            String disponible = tablaLibros.getValueAt(fila, 4).toString();
+
+            // Validar disponibilidad
+            if (!disponible.equals("Sí")) {
+                JOptionPane.showMessageDialog(this,
+                        "El libro NO está disponible.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            boolean exito = ServicioLibro.prestarLibro(idLibro, usuario);
+
+            if (exito) {
+                JOptionPane.showMessageDialog(this,
+                        "¡Préstamo registrado correctamente!",
+                        "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                // Actualizamos la tabla
+                modeloTabla.setRowCount(0);
+                cargarLibros();
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "ERROR: No se pudo registrar el préstamo.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         setVisible(true);
+    }
 
-        // Lógica para registrar el préstamo
-        // Aquí, puedes realizar cualquier operación para procesar el préstamo
-        // como actualizar la base de datos o llamar a un servicio
-        // como el servicio para marcar el libro como no disponible.
+
+    // ------------------------
+    // Cargar la tabla de libros
+    // ------------------------
+    private void cargarLibros() {
+        List<Libro> libros = ServicioLibro.obtenerTodos();
+
+        for (Libro l : libros) {
+            modeloTabla.addRow(new Object[]{
+                    l.getId(),
+                    l.getTitulo(),
+                    l.getAutor(),
+                    l.getCategoria(),
+                    l.isDisponible() ? "Sí" : "No"
+            });
+        }
     }
 }
